@@ -109,8 +109,8 @@ function createApp(): Application {
 
     app.use(express.static(frontendDistPath));
 
-    app.get('*', (_req: Request, res: Response): void => {
-      res.sendFile(path.join(frontendDistPath, 'index.html'));
+    app.use((_req: Request, res: Response): void => { 
+        res.sendFile(path.join(frontendDistPath, 'index.html'));
     });
   } else {
     app.use((req: Request, res: Response, _next: NextFunction): void => {
