@@ -1,0 +1,11 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(dir)",
+      "Bash(npm run *)",
+      "Bash(echo \"PID=$!\")",
+      "Bash(sleep 7 && cat /tmp/agentsforhr.log)",
+      "Read(//tmp/**)"
+    ]
+  }
+}

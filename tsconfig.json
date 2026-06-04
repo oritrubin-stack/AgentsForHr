@@ -1,0 +1,65 @@
+{
+  /**
+   * TypeScript Compiler Configuration
+   * ──────────────────────────────────
+   * Strict mode is enforced across the board to catch as many type errors as
+   * possible at compile time, keeping the runtime clean and predictable.
+   *
+   * Target: ES2020 — gives us async/await, optional chaining, nullish
+   * coalescing, and other modern JS features while remaining compatible with
+   * Node 18+.
+   */
+  "compilerOptions": {
+    /* ── Language / Output ─────────────────────────────────────── */
+    "target": "ES2020",                   // Compile down to ES2020 syntax
+    "module": "commonjs",                 // Node.js requires CommonJS modules
+    "lib": ["ES2020", "DOM"],              // ES2020 + DOM (needed for page.evaluate() callbacks in Playwright)
+    "outDir": "./dist",                   // Compiled JS goes here (never commit)
+    "rootDir": "./src",                   // All source TypeScript lives in /src
+
+    /* ── Module Resolution ─────────────────────────────────────── */
+    "moduleResolution": "node10",          // Node.js CommonJS module resolution (explicit alias)
+    "ignoreDeprecations": "6.0",          // Silence TS6 deprecation warning for node10
+    "esModuleInterop": true,              // Allow default imports from CJS modules
+    "allowSyntheticDefaultImports": true, // Pairs with esModuleInterop
+    "resolveJsonModule": true,            // Allow import of JSON files with types
+
+    /* ── Strict Type Checking ──────────────────────────────────── */
+    "strict": true,                       // Master strict flag (enables all below)
+    "noImplicitAny": true,               // Disallow implicit `any` types
+    "strictNullChecks": true,            // null/undefined must be handled explicitly
+    "strictFunctionTypes": true,         // Stricter checking for function types
+    "strictBindCallApply": true,         // Strict checking of bind/call/apply
+    "strictPropertyInitialization": true,// Class properties must be initialised
+    "noImplicitThis": true,              // Disallow `this` with implicit `any`
+    "alwaysStrict": true,                // Emit "use strict" in every output file
+
+    /* ── Additional Checks ─────────────────────────────────────── */
+    "noUnusedLocals": true,              // Error on declared-but-unused locals
+    "noUnusedParameters": true,          // Error on declared-but-unused parameters
+    "noImplicitReturns": true,           // Every code path must return a value
+    "noFallthroughCasesInSwitch": true,  // Prevent accidental switch fall-through
+    "forceConsistentCasingInFileNames": true, // Prevent casing bugs on case-insensitive FSes
+
+    /* ── Emit / Source Maps ────────────────────────────────────── */
+    "declaration": true,                 // Generate .d.ts declaration files
+    "declarationMap": true,              // Source maps for declaration files
+    "sourceMap": true,                   // Generate .js.map for debugging
+    "removeComments": false,             // Keep JSDoc comments in output
+
+    /* ── Interop / Compatibility ───────────────────────────────── */
+    "skipLibCheck": true,                // Skip type checks on .d.ts files in node_modules
+    "types": ["node"],                   // Explicitly anchor Node.js globals (process, Buffer, etc.) when lib includes DOM
+    "experimentalDecorators": true,      // Needed for some DI frameworks later
+    "emitDecoratorMetadata": true        // Emit metadata for decorators (e.g. inversify)
+  },
+
+  /* ── Project Scope ─────────────────────────────────────────────── */
+  "include": ["src/**/*"],               // Only compile files in /src
+  "exclude": [
+    "node_modules",                      // Never compile dependencies
+    "dist",                              // Never re-compile output
+    "**/*.spec.ts",                      // Exclude test files from production build
+    "**/*.test.ts"
+  ]
+}
