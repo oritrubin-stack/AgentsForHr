@@ -47,9 +47,10 @@
  *  • Persist data — that belongs to a repository layer.
  */
 
-import Anthropic           from '@anthropic-ai/sdk';
-import { HunterAgent }     from './hunter/HunterAgent';
-import { AnalyzerAgent }   from './analyzer/AnalyzerAgent';
+import Anthropic                from '@anthropic-ai/sdk';
+import { HunterAgent }          from './hunter/HunterAgent';
+import { AnalyzerAgent }        from './analyzer/AnalyzerAgent';
+import { BudgetExhaustedError } from '../errors/BudgetExhaustedError';
 import {
   JobSearchQuery,
   AnalyzedCandidate,
@@ -211,6 +212,23 @@ export class OrchestratorAgent {
     const settled = await Promise.allSettled(
       profiles.map((profile) => this.analyzer.analyze(profile, query)),
     );
+
+    // A 402 means the account is out of credits — no further calls will
+    // succeed.  Surface it as a hard campaign failure instead of silently
+    // discarding it alongside per-profile failures.
+    const budgetExhausted = settled.find(
+      (outcome): outcome is PromiseRejectedResult =>
+        outcome.status === 'rejected' &&
+        outcome.reason instanceof Anthropic.APIError &&
+        outcome.reason.status === 402,
+    );
+    if (budgetExhausted) {
+      console.error(
+        '[OrchestratorAgent] Anthropic HTTP 402 — account has insufficient credits. ' +
+        'Campaign aborted.',
+      );
+      throw new BudgetExhaustedError();
+    }
 
     const results: AnalyzedCandidate[] = [];
 
