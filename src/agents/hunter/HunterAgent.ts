@@ -189,7 +189,7 @@ export class HunterAgent {
       );
       profiles = await registeredStrategy.execute(query);
 
-    } else {
+    } else if (query.platform === 'mock' || query.platform === 'github') {
       // ── Tier 2: Built-in browser strategy ───────────────────────────────
       console.log(
         `[HunterAgent] No registered strategy for "${query.platform}". ` +
@@ -198,6 +198,24 @@ export class HunterAgent {
       profiles = await this.playwright.withPage(async (page: Page) => {
         return this._dispatchBrowserStrategy(page, query, opts, warnings);
       });
+
+    } else {
+      // ── Tier 3: No strategy, no browser implementation ───────────────────
+      // Skip chromium.launch() entirely — platforms like linkedin/email reach
+      // this branch when their env-var credentials are missing.  Launching the
+      // browser would crash on servers where Playwright binaries are not
+      // installed (e.g. Render free tier without `playwright install`).
+      console.warn(
+        `[HunterAgent] No registered strategy for "${query.platform}" and no ` +
+        `browser implementation exists. Falling back to mock data without ` +
+        `opening a browser.`,
+      );
+      warnings.push(
+        `Platform "${query.platform}" has no registered strategy. ` +
+        `Returning mock data. To enable real scraping, set the required ` +
+        `environment variables and register a strategy.`,
+      );
+      profiles = this._scrapeMock(query, opts);
     }
 
     const completedAt = new Date().toISOString();
